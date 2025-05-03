@@ -1,7 +1,7 @@
 global QA_PATH
 global TABLE_PATH
-QA_PATH = './qa.csv'
-TABLE_JSON_PATH = './auto_dump_table_info.json'
+QA_PATH = './rag_file/qa.csv'
+TABLE_JSON_PATH = './rag_file/auto_dump_table_info.json'
 
 DATA2URL = {
     'submarine_': 'https://ki3.org.cn/#/fiberOpticCommunication?sub=cableOverview',
