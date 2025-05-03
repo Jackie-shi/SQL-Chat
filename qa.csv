@@ -1,0 +1,127 @@
+Q,A
+Which country does AS1000 belong to?,"Thought: The user is asking for the country information of AS100.\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant tables are 'as_bgp_status', 'base_region'.\n
+Thought: I need the question related columns in the table 'as_bgp_status' and 'base_region' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_bgp_status' and 'base_region'.\n
+Observation: The table 'as_bgp_status' has these related columns: 'asn', 'region'. The table 'base_region' has these related columns: 'region_2letter_code', 'full_name_cn'.\n
+Thought: First I can get country abbreviation of this AS from column 'region' of table  'as_bgp_status'. Then I can map the abbreviation to a full name. The column 'region_2letter_code' represents country abbreviation and 'full_name_cn' represents corresponding full country name in Chinese.\n  
+Thought: I now know the final answer.\n
+Final Check: The table ""as_bgp_status"" and 'base_region' is based on the known information.\n
+Final Answer: \n
+SQL: SELECT y.full_name_cn FROM as_bgp_status as x JOIN base_region as y ON x.region=y.region_2letter_code WHERE x.asn=100;\n"
+List the organization and rir infomation of AS1000.,"Thought: The user is asking for the organization and rir information of Autonomous System (AS1000).\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant table is 'as_bgp_status' that contains the related information. I choose table 'as_bgp_status' for this question.\n
+Thought: I need the question related columns in the table 'as_bgp_status' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_bgp_status'.\n
+Observation: The table 'as_bgp_status' has these related columns: 'orgname', 'rir'.\n
+Thought: The 'orgname' corresponds to organization information and 'rir' corresponds to rir information. So I can get these infomation from table 'as_bgp_status' with the condition asn=1000.
+Thought: I now know the final answer.\n
+Final Check: The table ""as_bgp_status"" is based on the known information.\n
+Final Answer: \n
+SQL: SELECT orgname, rir FROM as_bgp_status WHERE asn=1000;\n"
+How many ASs have customer cone size greater than 100?,"Thought: The user is asking for the number of Autonomous Systems who have customer cone size greater than 100.\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant table is 'as_business_relation_info' that contains the related information. I choose table 'as_business_relation_info' for this question.\n
+Thought: I need the question related columns in the table 'as_business_relation_info' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_business_relation_info'.\n
+Observation: The table 'as_business_relation_info' has these related columns: 'cone_size', 'asn'.\n
+Thought: The 'cone_size' corresponds to customer cone size information. So I can get these infomation from table 'as_business_relation_info'.\n
+Thought: I now know the final answer.\n
+Final Check: The table ""as_business_relation_info"" is based on the known information.\n
+Final Answer: \n
+SQL: SELECT COUNT(DISTINCT asn) FROM as_business_relation_info WHERE cone_size>100;\n"
+What is the business relationship between AS100 and AS200?,"Thought: The user is asking for the business relationship between two Autonomous Systems (AS100 and AS200).\n
+Action: Search in the known information(provided in your example). \n
+Observation: The relavent tables are 'as_business_relation_info' and 'as_rel', but only 'as_rel' table contains business relationship between two ASes. Therefore I choose table 'as_rel' for the question.\n
+Thought: I need the question related columns in the table 'as_rel' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_rel'.\n
+Observation: The table 'as_rel' has these related columns: 'as1', 'as2', 'rel'.\n
+Thought: The 'rel' corresponds to business relationship information. If 'rel'=0, as1 and as2 are peers relationship. If 'rel'=-1, as1 is the provider of as2. So I can get these infomation from table 'as_business_relation_info' with the condition (as1=100 and as2=100) or (as1=200 and as1=100).\n
+Thought: I now know the final answer.\n
+Final Check: The table ""as_rel"" is based on the known information.\n
+Final Answer: \n
+SQL: SELECT rel FROM as_rel WHERE (as1 = 100 AND as2 = 200) OR (as1 = 200 AND as2 = 100);\n"
+How many IPv4 address prefixes belong to more than one AS?,"Thought: The user is asking for the number of IPv4 address prefixes owned by more than one AS.\n
+Action: Search in the known information(provided in your example). \n
+Observation: The relavent table is 'p2a_v4' that contains the related information. I choose table 'p2a_v4' for the question.\n
+Thought: I need the question related columns in the table 'p2a_v4' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'p2a_v4'.\n
+Observation: The table 'p2a_v4' has these related columns: 'prefix', 'origin'.\n
+Thought: The 'prefix' corresponds to IPv4 address prefix information. I can get prefixes that meet the conditions through group by operation from the table 'p2a_v4'. \n
+Thought: I now know the final answer.\n
+Final Check: The table 'p2a_v4' is based on the known information.\n
+Final Answer: \n
+SQL: SELECT COUNT(x.prefix) FROM (SELECT prefix FROM p2a_v4 GROUP BY prefix HAVING COUNT(DISTINCT origin) > 1) AS x;\n"
+List the emails of all origin ASes who own the prefix 1.1.1.1/24.,"Thought: The user is asking for the email information of all Autonomous Systems who own the prefix 1.1.1.1/24.\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant table is 'p2a_v4' and 'as_email'. \n
+Thought: I need the question related columns in the table 'p2a_v4' and 'as_email' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'p2a_v4'.\n
+Observation: The table 'p2a_v4' has these related columns: 'prefix', 'asn'. \n
+Thought: I can use the 'prefix' and 'asn' in table 'p2a_v4' to get all asns that own prefix 1.1.1.1/24. \n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_email'. \n
+Observation: The table 'as_email' has these related columns: 'asn', 'email'.\n
+Thought: I can use 'email' and  'asn' in table 'as_email' to get the email infomation.\n
+Thought: I now know the final answer.\n
+Final Check: The table 'p2a_v4' and 'as_email' are based on the known information.\n
+Final Answer: \n
+SQL: SELECT email FROM as_email as x INNER JOIN p2a_v4 as y ON x.asn=y.origin WHERE y.prefix='1.1.1.1/24';\n"
+Tell me which RIR does AS200 registered in.,"Thought: The user is asking for the rir registration information of Autonomous System (AS200).\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant table is 'as_bgp_status' that contains the related information. I choose table 'as_bgp_status' for this question.\n
+Thought: I need the question related columns in the table 'as_bgp_status' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_bgp_status'.\n
+Observation: The table 'as_bgp_status' has these related columns: 'rir', 'asn'.\n
+Thought: The 'rir' corresponds to the rir registration information. So I can get rir infomation from table 'as_bgp_status' with the condition asn=200.\n
+Thought: I now know the final answer.\n
+Final Check: The table ""as_bgp_status"" is based on the known information.\n
+Final Answer: \n
+SQL: SELECT rir FROM as_bgp_status WHERE asn=200;\n"
+Does AS100 connect to AS200?,"Thought: The user is asking for the connection information between two Autonomous Systems (AS100 and AS200).\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant table are 'asadj_all', 'asadj_v4', 'asadj_v6'. However, only 'asadj_all' has the full data of the AS adjacency infomation. Therefore I choose table 'asadj_all' for this question.\n
+Thought: I need the question related columns in the table 'asadj_all' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'asadj_all'.\n
+Observation: The table 'asadj_all' has these related columns: 'as_a', 'as_b'.\n
+Thought: I can use count operation to get whether there is a connection between the two ASes. If result is zero, then there is no connection. So I can get connection infomation from table 'asadj_all' with the condition (as_a=100 and as_b=100) or (as_a=200 and as_b=100).\n
+Thought: I now know the final answer.\n
+Final Check: The table ""asadj_all"" is based on the known information.\n
+Final Answer: \n
+SQL: SELECT COUNT(*) FROM asadj_all WHERE (as_a=100 AND as_b=100) OR (as_a=200 AND as_b=100);\n"
+List the provider of AS100.,"Thought: The user is asking for all Autonomous Systems who are the providers of AS100.\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant table are 'as_rel', 'as_business_relation_info'. However, the table 'as_business_relation_info' doesn't contain the business relationship between two ASes, so I can't get provider asn from it. Therefore I choose table 'as_rel' for this question.\n
+Thought: I need the question related columns in the table 'as_rel' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_rel'.\n
+Observation: The table 'as_rel' has these related columns: 'rel', 'as1', 'as2'.\n
+Thought: The table 'as_rel' contains the column 'rel' which represents the business relationship between two ASes. If rel=-1, then the relationship between two ASes is p2c(provider to customer). If rel=0, then the relationship between two ASes is p2p(peer to peer). So I can get AS100's provider with the condition (rel=-1 and as2=100).
+Thought: I now know the final answer.\n
+Final Check: The table ""as_rel"" is based on the known information.\n
+Final Answer: \n
+SQL: SELECT DISTINCT as1 FROM as_rel WHERE (rel=-1 AND as2=100);\n"
+List the customers of AS100.,"List the customers of AS100.
+
+Thought: The user is asking for all Autonomous Systems who are the customers of AS100.\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant table are 'as_rel', 'as_business_relation_info'. However, the table 'as_business_relation_info' doesn't contain the business relationship between two ASes, so I can't get provider asn from it. Therefore I choose table 'as_rel' for this question.\n
+Thought: I need the question related columns in the table 'as_rel' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_rel'.\n
+Observation: The table 'as_rel' has these related columns: 'rel', 'as1', 'as2'.\n
+Thought: The table 'as_rel' contains the column 'rel' which represents the business relationship between two ASes. If rel=-1, then the relationship between two ASes(as1 and as2) is p2c(provider to customer). If rel=0, then the relationship between two ASes is p2p(peer to peer). So I can get AS100's provider with the condition (rel=-1 and as1=100).
+Thought: I now know the final answer.\n
+Final Check: The table ""as_rel"" is based on the known information.\n
+Final Answer: \n
+SQL: SELECT DISTINCT as2 FROM as_rel WHERE (rel=-1 AND as1=100);\n"
+How many ASes who are the customers of AS100 have customer cone size greater than 10.,"Thought: The user is asking for the number of Autonomous Systems who are the customers of AS100 and have customer cone size greater than 10.\n
+Action: Search in the known information (provided in your example).\n
+Observation: The relevant table are 'as_rel', 'as_business_relation_info'. In table 'as_rel', there is business relationship between 2 ASes. In table 'as_business_relation_info', there is customer cone size of AS. Therefore I choose table 'as_rel' and 'as_business_relation_info' for this question.\n
+Thought: I need the question related columns in the table 'as_rel' and 'as_business_relation_info' to write correct SQL.\n
+Action: Search in the known information(provided in your example), choose the related columns of the table 'as_rel' and 'as_business_relation_info'.\n
+Observation: The table 'as_rel' has these related columns: 'rel', 'as1', 'as2'. The table 'as_business_relation_info' has these related columns: 'asn', 'cone_size'.\n
+Thought: The table 'as_rel' contains the column 'rel' which represents the business relationship between two ASes. If rel=-1, then the relationship between two ASes(as1 and as2) is p2c(provider to customer). If rel=0, then the relationship between two ASes is p2p(peer to peer). So I can get AS100's provider with the condition (rel=-1 and as1=100). The table 'as_business_relation_info' contains the column 'cone_size' representing the customer cone szie.
+Thought: I now know the final answer.\n
+Final Check: The table ""as_rel"" and ""as_business_relation_info"" are based on the known information.\n
+Final Answer: \n
+SQL: SELECT COUNT(*) FROM (SELECT DISTINCT x.as2 FROM as_rel AS x JOIN as_business_relation_info AS y ON x.as2 = y.asn WHERE x.as1 = 100 AND x.rel = -1 AND y.cone_size > 10) AS result;\n"
