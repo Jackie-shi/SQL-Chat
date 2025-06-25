@@ -4,6 +4,8 @@ import time
 import pandas as pd
 import concurrent.futures
 import threading
+from typing import Optional, Dict, Any
+from pydantic import BaseModel, Field
 
 from sklearn.neighbors import NearestNeighbors
 from sentence_transformers import SentenceTransformer
@@ -16,38 +18,9 @@ import pickle
 import torch
 
 from mysql import MySQLDatabase
-from .globals import *
+from globals import *
 
 MODEL_PATH = './model/bge-m3' # need to be changed
-SQL_TIMEOUT = 5
-def execute_sql(sql):
-    mysql = MySQLDatabase(in_product=True)
-    if 'create' in sql.lower() or 'delete' in sql.lower() or 'drop' in sql.lower() or 'insert' in sql.lower():
-        return 'Execute fail. You can\'t modify these tables! Your wrong SQL is \"{sql}\".'
-    if 'limit' not in sql.lower():
-        sql = sql.rstrip(';')
-        sql += ' LIMIT 5;'
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(mysql.fetch, sql)
-        try:
-            result = future.result(timeout=SQL_TIMEOUT)
-        except concurrent.futures.TimeoutError:
-            return 'Timeout', 'Timeout'
-    # result = mysql.fetch(sql)
-
-    return_card = "<Execute result>\n{s}\n</Execute result>"
-    if result[0]:
-        s = 'Execute success. The SQL is correct.'
-        final_result = result[1]
-    else:
-        pattern = r"[\s\S]*\([\s\S]*,([\s\S]*)\)"
-        error_info = result[1]
-        m = re.search(pattern, error_info)
-        if m:
-            s = f'Execute fail. The Error is {m.group(1).strip()}. Your wrong SQL is \"{sql}\", you need to modify it.'
-            final_result = ''
-    return return_card.format(s=s), final_result
-
 
 def load_cache(file_path):
     try:
@@ -60,46 +33,25 @@ def save_cache(file_path, cache):
     with open(file_path, 'wb') as f:
         pickle.dump(cache, f)
 
-class KNNQA(object):
-    """
-    Archived
-    """
-    def __init__(self, QA_path) -> None:
-        self.df = pd.read_csv(QA_path)
-        # Load model directly
-        
-        self.model = AutoModel.from_pretrained("microsoft/MiniLM-L12-H384-uncased")
-    
-    def get_topk_question(self, query, k=5):
-        questions = self.df['Q'].values.tolist()
-        questions.append(query)
-        embeddings = self.model.encode(questions, convert_to_tensor=True)
-        nrnb = NearestNeighbors(n_neighbors=k).fit(embeddings[:-1])
-        distances, indices = nrnb.kneighbors(embeddings[-1].reshape(1, -1)) # indices: [[i1, i2, ...]]
-
-        top_qa = self.df.iloc[indices[0], :].values.tolist()
-        return top_qa
-    
-    def create_demonstration(self, query, k=5):
-        top_qa = self.get_topk_question(query, k) # [[q, a], [q, a], ...]
-        qa_prompt = []
-        for i in range(len(top_qa)-1,-1,-1):
-            q_template = f"Question: {top_qa[i][0]} \n"
-            a_template = top_qa[i][1]
-            qa_prompt.append(q_template + a_template)
-        qa_sumup_prompt = ""
-        for idx, item in enumerate(qa_prompt):
-            qa_sumup_prompt += f"Example{idx+1}\n" + "\n" + item + "\n\n" 
-        
-        return qa_sumup_prompt
-
-class KNNSchema(object):
+class KNNSchema(BaseModel):
     """
     RAG：召回和用户问题最相关的Table schema信息
     """
-    def __init__(self) -> None:
-        self.model = SentenceTransformer(MODEL_PATH)
-        self.cache = load_cache('./model/embedding_cache.pkl')
+    model: Optional[SentenceTransformer] = Field(
+        default=None,
+        description="Sentence transformer model for embeddings"
+    )
+    cache: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Cache for embeddings"
+    )
+    
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.model is None:
+            self.model = SentenceTransformer(MODEL_PATH)
+        if self.cache is None:
+            self.cache = load_cache('./model/embedding_cache.pkl')
 
     def get_embeddings(self, texts):
         embeddings = []

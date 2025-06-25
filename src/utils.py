@@ -2,7 +2,9 @@ import pandas as pd
 import json
 import pdb
 import re
-from typing import List
+from typing import List, Dict, Any, Set
+from pydantic import BaseModel
+from collections import defaultdict
 
 import datetime
 
@@ -88,11 +90,6 @@ def get_context(chat_id):
     # 获得最近的10个历史窗口数据
     return context_l[:10]
 
-def info(s: str):
-    now = datetime.datetime.now()
-    time_str = datetime.datetime.strftime(now, '%Y-%m-%d %H:%M:%S')
-    print(f"[{time_str}] {s}")
-
 def map_table_url(table_name, map: dict):
     split_name: List = table_name.strip().split('_')
     key_l = ['_'.join(split_name[:i])+'_' for i in range(1,len(split_name))]
@@ -105,3 +102,65 @@ def map_table_url(table_name, map: dict):
             if key in map:
                 return map[key]
     return ''
+
+def parse_by_pydantic(content: str, base_model: BaseModel):
+    """Parse the content by BaseModel schema
+    """
+    # {'properties': {'x': {'title': 'X', 'type': 'string'}, 'y': {'title': 'Y', 'type': 'integer'}}, 'required': ['x', 'y'], 'title': 'H', 'type': 'object'}
+    model_schema: Dict = base_model.model_json_schema()
+    required_attrs: List[str] = model_schema["required"]
+    pattern_zoo = [
+        r'["\']?{attr}["\']?\s*:\s*"([^"]*)"',
+        r'["\']?{attr}["\']\s*:\s*([^,\n\r]+)',
+    ]
+    parsed_data: Dict[str, Any] = {}
+    
+    for attr in required_attrs:
+        # First try to match quoted string values
+        for pattern in pattern_zoo:
+            pattern = pattern.format(attr=attr)
+            match = re.search(pattern, content)
+            if match:
+                parsed_data[attr] = match.group(1)
+                break
+    if len(parsed_data) != required_attrs:
+        raise json.JSONDecodeError()
+    
+    properties: Dict = model_schema["properties"]
+    for key, value in parsed_data.items():
+        attr_type = properties[key]["type"]
+        if attr_type == "string":
+            parsed_data[key] = str(value)
+        elif attr_type == "integer":
+            parsed_data[key] = int(value)
+        elif attr_type == "number":
+            parsed_data[key] = float(value)
+        elif attr_type == "boolean":
+            parsed_data[key] = True if value.lower() == 'true' else False
+    
+    return parsed_data
+
+def dag_post_process(questions: str, dependencies: str):
+    idx2question: Dict[int, str] = defaultdict()
+    node_dependency: Dict[int, Set[int]] = defaultdict(set)
+    lines = questions.strip().split('\n')
+    for line in lines:
+        line = line.strip()
+        if line:
+            # Match pattern like "1. question text"
+            match = re.match(r'^(\d+)[.]\s*(.+)$', line)
+            if match:
+                idx = int(match.group(1))
+                question = match.group(2).strip()
+                idx2question[idx] = question
+    
+    for dependency in dependencies.strip().split('\n'):
+        dependency = dependency.strip()
+        tmp_l = [int(idx) for idx in dependency.split('->')]
+        if len(tmp_l) > 1:
+            # 1 -> 2 2: [1]
+            node_dependency[tmp_l[1]].add(tmp_l[0])
+    
+    return idx2question, node_dependency
+
+
