@@ -145,9 +145,9 @@ def run():
     result = fetch_from_datahub(tables)
     new_datahub_dict = transform_datahub_result(result)
 
-    with open('./datahub_cold_raw_info.json', 'r') as f:
+    with open('../rag_file/datahub_cold_raw_info.json', 'r') as f:
         bench_datahub_dict = json.load(f)
-    with open('./auto_dump_table_info.json', 'r') as f:
+    with open('../rag_file/auto_dump_table_info.json', 'r') as f:
         bench_result = json.load(f)
     # 增量更新
     needed_update_table: List = []

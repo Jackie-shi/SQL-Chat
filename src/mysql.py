@@ -8,18 +8,15 @@ class MySQLDatabase():
     establish and close a new connection exclusively used for this SQL execution.
     This can avoid waiting timeout problem caused by MySQL's default setting.
     """
-    DB_HOST = '192.168.17.1'
+    DB_HOST = 'localhost'
 
     def __init__(self, in_product=True):
         self.mysql_conn = None
-        if in_product:
-            self.DB_PORT = 23306
-        else:
-            self.DB_PORT = 23307
+        self.DB_PORT = 3306
     
     def conn_acquire(self):
-        self.mysql_conn = pymysql.connect(host=self.DB_HOST, port=self.DB_PORT, user='ki3-backends', 
-                                         password='Backends12345@', db='website')
+        self.mysql_conn = pymysql.connect(host=self.DB_HOST, port=self.DB_PORT, user='root', 
+                                         password='sjy20011121', db='chat2sql')
 
         # # set max_allowed_packet to 1G
         # with self.mysql_conn.cursor() as cursor:
