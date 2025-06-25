@@ -23,9 +23,9 @@ from langchain_core.messages import (
 from mysql import MySQLDatabase
 from utils import info
 
-END_POINT = "http://192.168.17.5:48080"
-API_KEY= 'sk-proj-oOwaDHznCtkIeNEhbxoVT3BlbkFJ4BazpkT0XiPHHOA1k50p'
-MODEL = ChatOpenAI(model="gpt-4o-mini", openai_api_key=API_KEY, openai_api_base='https://openai.lmzgc.cn/v1', temperature=0)
+END_POINT = "<end point>"
+API_KEY= '<your api key>'
+MODEL = ChatOpenAI(model="gpt-4o-mini", openai_api_key=API_KEY, openai_api_base='https://xxx.xx', temperature=0)
 # 需要对数据进行过滤
 NO_MEANING_TABLES = ['ki3_data_source', 'permission_resource', 'permission_role', 'permission_role_resource', 'permission_user', 'permission_user_role', 'sys_operate_log', 'user_ai_chat', 'user_ai_chat_detail','user_contact','user_download', 'user_feedback', 'user_feedback_detail', 'ipv6_anycast_addresses_1', 'ipv6_anycast_addresses_2', 'syn_task_worker', 'iana_ipv4_special_registry_1', 'iana_ipv6_special_registry_1', 'ipv4_recovered_address_space_1', 'ipv4_recovered_address_space_2', 'ipv4_location', 'ipv6_support_domain', 'ki3_notification', 'ki3_paper', 'user_measurement_blockip', 'themis_alarms', 'sav_insertdb_record', 'ki3_dataset']
 NO_MEANING_TABLE_PRE = ['zdel', 'ki3', 'user']
