@@ -16,7 +16,7 @@ class MySQLDatabase():
     
     def conn_acquire(self):
         self.mysql_conn = pymysql.connect(host=self.DB_HOST, port=self.DB_PORT, user='root', 
-                                         password='sjy20011121', db='chat2sql')
+                                         password='****', db='chat2sql')
 
         # # set max_allowed_packet to 1G
         # with self.mysql_conn.cursor() as cursor:
